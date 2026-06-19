@@ -80,8 +80,14 @@ def add_message(name, message):
 def delete_message(message_id):
     """Удаляет сообщение из базы данных по его id."""
     conn = get_db_connection()
-    conn.execute('DELETE FROM messages WHERE id = ?', (message_id,))
-    conn.commit()
+    # Проверяем, что сообщение существует
+    existing = conn.execute('SELECT * FROM messages WHERE id = ?', (message_id,)).fetchone()
+    if existing:
+        conn.execute('DELETE FROM messages WHERE id = ?', (message_id,))
+        conn.commit()
+        print(f"Сообщение {message_id} удалено")  # Для отладки
+    else:
+        print(f"Сообщение {message_id} не найдено")  # Для отладки
     conn.close()
 
 def delete_all_messages():
