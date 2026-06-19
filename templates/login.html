@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Вход в гостевую книгу</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Вход в гостевую книгу</h1>
+        
+        {% if error %}
+            <div class="error-message" style="text-align: center; margin-bottom: 20px;">
+                {{ error }}
+            </div>
+        {% endif %}
+        
+        <form method="POST" class="login-form">
+            <input type="text" name="username" placeholder="👤 Логин" required autofocus>
+            <input type="password" name="password" placeholder="🔒 Пароль" required>
+            <button type="submit">🚪 Войти</button>
+        </form>
+        
+        <div style="text-align: center; margin-top: 20px; padding: 10px; background: #e9ecef; border-radius: 5px;">
+            <strong>📝 Тестовые данные:</strong><br>
+            Логин: <strong>admin</strong> | Пароль: <strong>123</strong>
+        </div>
+        
+        <p style="text-align: center; margin-top: 20px;">
+            <a href="/">← На главную</a>
+        </p>
+    </div>
+</body>
+</html>

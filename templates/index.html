@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Гостевая книга</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Гостевая книга</h1>
+        
+        <!-- Блок авторизации -->
+        <div class="auth-links">
+            {% if logged_in %}
+                <span>👋 Привет, <strong>{{ username }}</strong>!</span>
+                <span>|</span>
+                <a href="/logout">🚪 Выйти</a>
+            {% else %}
+                <span>🔒 Вы не авторизованы</span>
+                <span>|</span>
+                <a href="/login">🔐 Войти</a>
+                <span>(admin / 123)</span>
+            {% endif %}
+        </div>
+        
+        <!-- Уведомления -->
+        {% if session.pop('success', False) %}
+        <div class="notification success" id="notification">
+            ✅ Сообщение добавлено!
+        </div>
+        {% endif %}
+        
+        {% if session.pop('deleted', False) %}
+        <div class="notification info" id="notification">
+            🗑️ Сообщение удалено!
+        </div>
+        {% endif %}
+        
+        {% if session.pop('all_deleted', False) %}
+        <div class="notification warning" id="notification">
+            🗑️ Все сообщения удалены!
+        </div>
+        {% endif %}
+        
+        <!-- Счётчик сообщений -->
+        <div class="counter">
+            📊 Всего сообщений: <strong>{{ total_count }}</strong>
+        </div>
+        
+        <!-- Кнопки сортировки -->
+        <div class="sort-buttons">
+            <span>📅 Сортировка:</span>
+            <a href="/sort/newest" class="sort-link">🆕 Сначала новые</a>
+            <a href="/sort/oldest" class="sort-link">📅 Сначала старые</a>
+        </div>
+        
+        <h2>💬 Сообщения</h2>
+        
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="message {% if loop.index0 % 2 == 0 %}message-even{% else %}message-odd{% endif %} {% if msg.created_at == today %}fresh{% endif %}">
+                <div class="message-header">
+                    <strong>👤 {{ msg.name }}</strong>
+                    <small>📅 {{ msg.created_at|date_russian }}</small>
+                    <!-- Кнопка удаления показывается ТОЛЬКО авторизованным -->
+                    {% if logged_in %}
+                        <a href="/delete/{{ msg.id }}" class="delete-btn" 
+                           onclick="return confirm('🗑️ Удалить сообщение от {{ msg.name }}?')">❌ Удалить</a>
+                    {% endif %}
+                </div>
+                <p>💭 {{ msg.message }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-message">📭 Пока нет сообщений. Будьте первым!</p>
+        {% endif %}
+        
+        <div class="add-form">
+            <h2>✍️ Оставить сообщение</h2>
+            
+            <form method="POST" action="/add">
+                <input type="text" name="name" placeholder="👤 Ваше имя" 
+                       class="{% if error %}input-error{% endif %}" required>
+                <textarea name="message" placeholder="💬 Ваше сообщение" rows="4" 
+                          class="{% if error %}input-error{% endif %}" required></textarea>
+                {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                {% endif %}
+                <button type="submit">✉️ Отправить</button>
+            </form>
+        </div>
+        
+        <!-- Кнопка удаления всех сообщений (только для авторизованных) -->
+        {% if logged_in and total_count > 0 %}
+        <div class="delete-all">
+            <a href="/delete-all" class="delete-all-btn" 
+               onclick="return confirm('⚠️ Вы уверены, что хотите удалить ВСЕ сообщения? Это действие нельзя отменить!')">
+                🗑️ Удалить все сообщения
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        // Автоматическое скрытие уведомлений через 3 секунды
+        setTimeout(function() {
+            var notifications = document.querySelectorAll('.notification');
+            notifications.forEach(function(notification) {
+                notification.style.opacity = '0';
+                setTimeout(function() {
+                    if (notification) notification.style.display = 'none';
+                }, 500);
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
